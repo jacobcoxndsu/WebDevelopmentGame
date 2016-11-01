@@ -1,0 +1,50 @@
+
+//THE JAVASCRIPT FILE RUNNING THE SERVER
+var express = require('express');
+var app = express();
+var serv = require('http').Server(app);
+ 
+app.get('/',function(req, res) {
+    res.sendFile(__dirname + '/client/index.html');
+});
+app.use('/client',express.static(__dirname + '/client'));
+ 
+serv.listen(2000);
+console.log("Server started.");
+ 
+ 
+var io = require('socket.io')(serv,{});
+io.sockets.on('connection', function(socket){
+    console.log('socket connection');
+ 
+    socket.on('happy',function(data){
+        console.log('happy because ' + data.reason);
+    });
+   
+    socket.emit('serverMsg',{
+        msg:'hello',
+    });
+   
+});
+
+//THE HTML THE CLIENT CONNECTS WITH
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script>
+    var socket = io();
+   
+    var random = Math.random();
+   
+    var happy = function(){
+        socket.emit('happy',{
+            reason:'its my birthday' + random
+        });
+    }
+   
+    socket.on('serverMsg',function(data){
+        console.log(data.msg); 
+    });
+ 
+   
+</script>
+ 
+<button onclick="happy()">Happy</button>
